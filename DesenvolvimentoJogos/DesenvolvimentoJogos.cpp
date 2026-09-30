@@ -1,11 +1,14 @@
-// DesenvolvimentoJogos.cpp : Este arquivo contém a função 'main'. A execução do programa começa e termina ali.
-//
-
 #include <iostream>
+#include "Vector2D.hpp"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    Vector2D a(1.0f, 2.0f);
+    Vector2D b(3.0f, 4.0f);
+
+    Vector2D c = 2.0f * b;
+
+    std::cout << "a + b = (" << c.x << ", " << c.y << ")\n";
 }
 
 // Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
