@@ -1,0 +1,16 @@
+operator+
+	soma de dois vetores
+operator-
+	subtração de dois vetores
+operator*
+	multiplicação de vetor por um escalar
+operador*
+	multiplicação de vetor por um escalar salvando na variável original e ja usando o operator* feito
+operator+=
+	faz a soma salvando na propria variavel
+operator-=
+	faz a subtração salvando na propria variavel
+operator*=
+	faz a multiplicação salvando na propria variavel
+equals
+	compara se dois vetores são iguais, com uma tolerancia para casas decimais
