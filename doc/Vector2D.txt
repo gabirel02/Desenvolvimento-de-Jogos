@@ -4,8 +4,8 @@ operator-
 	subtração de dois vetores
 operator*
 	multiplicação de vetor por um escalar
-operador*
-	multiplicação de vetor por um escalar salvando na variável original e ja usando o operator* feito
+operator* fora da struct
+	faz o escalar * vetor, ja usando o operador* anterior
 operator+=
 	faz a soma salvando na propria variavel
 operator-=
@@ -14,3 +14,11 @@ operator*=
 	faz a multiplicação salvando na propria variavel
 equals
 	compara se dois vetores são iguais, com uma tolerancia para casas decimais
+operator/
+	divisão do vetor por um escalar retornando um novo vetor comparando se o escalar é maior que o epsilon usando o assert
+operator/=
+	divisão do vetor por um escalar alterando o proprio vetor, comparando se o escalar é maior que epsilon usando o assert
+normalized
+	retorna o vetor normalizado para ter o comprimento 1
+normalize
+	não retorna nada, normaliza o próprio vetor que chama a função

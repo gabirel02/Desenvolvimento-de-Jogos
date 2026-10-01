@@ -6,7 +6,7 @@ int main()
     Vector2D a(1.0f, 2.0f);
     Vector2D b(3.0f, 4.0f);
 
-    Vector2D c = 2.0f * b;
+    Vector2D c = b /= 2.0f;
 
     std::cout << "a + b = (" << c.x << ", " << c.y << ")\n";
 }
