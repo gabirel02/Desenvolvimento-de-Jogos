@@ -1,0 +1,43 @@
+translation
+	Cria uma transformação que desloca pontos. Usa a identidade que vem do construtor
+	e coloca tx em m[2][0] e ty em m[2][1], que é a terceira linha, onde o cabeçalho define que fica a translação.
+
+scale
+	Cria uma transformação que muda o tamanho, multiplicando o x por sx
+	e o y por sy. Parte da identidade e coloca sx em m[0][0] e sy em
+	m[1][1], na diagonal da matriz.
+
+transform_point
+	Aplica a transformação a um ponto (uma posição) e retorna o ponto
+	resultante, sem alterar o original. O ponto é tratado como o
+	vetor-linha [x, y, 1] multiplicado pela matriz, então cada
+	componente do resultado usa uma coluna:
+	  x' = x*m[0][0] + y*m[1][0] + m[2][0]
+	  y' = x*m[0][1] + y*m[1][1] + m[2][1]
+	Como o terceiro componente é 1, a translação da linha 2 é aplicada.
+
+transform_vector
+	Aplica a transformação a uma direção e retorna a direção resultante.
+	Usa a mesma fórmula do transform_point, mas a direção é [x, y, 0],
+	então os termos da linha 2 são multiplicados por zero e somem, a translação não tem efeito.
+
+rotation
+	Cria uma transformação que gira pontos em torno da origem (0, 0).
+	Parte da identidade, calcula o cosseno e o seno do ângulo uma vez
+	cada (std::cos e std::sin) e preenche as posições conforme o
+	cabeçalho: cosseno em m[0][0] e m[1][1], seno em m[0][1] e menos o
+	seno em m[1][0].
+
+operator*
+    Seguindo o cabeçalho o resultado de A * B equivale a aplicar A primeiro e depois B.
+	Implementei a multiplicação de matrizes 3x3: cada posição [i][j] do resultado é a soma dos produtos da linha i 
+	da matriz da esquerda pela coluna j da matriz da direita. Usei três laços for: i percorre as linhas, j as colunas, e o
+	terceiro laço faz a soma dos três produtos. O resultado é montado numa matriz separada, sem alterar as duas matrizes de entrada.
+	A soma é feita numa variável que começa em zero para cada posição, porque a matriz do resultado nasce como identidade e somar direto
+	nela deixaria a diagonal com 1 a mais.
+
+operator*=
+	Faz a mesma multiplicação do operator*, mas guarda o resultado na
+	própria transformação que chama a função (a da esquerda) e retorna
+	ela mesma. Para isso, reaproveita o operator*: o próprio
+	objeto recebe o resultado de *this * rhs.
