@@ -1,0 +1,20 @@
+bounds
+	Monta a caixa de colisão (AABB) de uma entidade a partir da posição dela. 
+	A posição da entidade é o centro da caixa, e o halfExtents guarda metade 
+	da largura e metade da altura, que é a distância do centro até cada borda. 
+	Por padrão, halfExtents vale TILE_SIZE * 0.5 = 32, o que dá uma caixa de 64 x 64 pixels.
+	Seguindo o retorno definido no cabeçalho, o canto min é a posição
+	menos halfExtents, e o canto max é a posição mais halfExtents. Para
+	isso reaproveitei o operator- e o operator+ do Vector2D, que fazem a
+	conta nos dois eixos de uma vez.
+ 
+intersects
+	Verifica se duas caixas se sobrepõem. A ideia usada é que duas AABB
+	se sobrepõem se elas se sobrepõem no eixo x E no eixo y ao mesmo tempo. 
+	Em cada eixo, os dois intervalos se sobrepõem quando o início de um
+	é menor ou igual ao fim do outro, nos dois sentidos:
+	  sobrepoe_x = (min.x <= other.max.x) e (other.min.x <= max.x)
+	  sobrepoe_y = (min.y <= other.max.y) e (other.min.y <= max.y)
+	A função retorna verdadeiro somente se as duas condições forem
+	verdadeiras. Usei <= (e não <) porque o cabeçalho define que bordas
+	que apenas se encostam contam como sobreposição.

@@ -141,6 +141,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\Collision2D.cpp" />
+    <ClCompile Include="..\source\RigidBody2D.cpp" />
     <ClCompile Include="..\source\Transform2D.cpp" />
     <ClCompile Include="..\source\Vector2D.cpp" />
     <ClCompile Include="DesenvolvimentoJogos.cpp" />

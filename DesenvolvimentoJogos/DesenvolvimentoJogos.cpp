@@ -1,7 +1,12 @@
+// DesenvolvimentoJogos.cpp
+// Arquivo de testes do Vector2D, Transform2D e Collision2D. Nao faz parte da
+// entrega: serve apenas para conferir se as funcoes implementadas estao corretas.
+
 #include <iostream>
 #include <cmath>
 #include "Vector2D.hpp"
 #include "Transform2D.hpp"
+#include "Collision2D.hpp"
 
 // --- Contadores de testes -------------------------------------------------
 static int g_total = 0;
@@ -44,6 +49,14 @@ void testar_bool(const char* nome, bool obtido, bool esperado) {
     std::cout << (ok ? "[OK]   " : "[ERRO] ") << nome
         << " -> obtido " << (obtido ? "verdadeiro" : "falso")
         << ", esperado " << (esperado ? "verdadeiro" : "falso") << "\n";
+}
+
+// Cria uma AABB a partir dos dois cantos (atalho para os testes)
+AABB caixa(float min_x, float min_y, float max_x, float max_y) {
+    AABB c;
+    c.min = Vector2D(min_x, min_y);
+    c.max = Vector2D(max_x, max_y);
+    return c;
 }
 
 int main() {
@@ -223,20 +236,62 @@ int main() {
         acumulada.transform_point(Vector2D(1.0f, 0.0f)), Vector2D(7.0f, 0.0f));
     testar_bool("operator*= retorna a propria transformacao", &ref_t == &acumulada, true);
 
+    // =====================================================================
+    std::cout << "\n=== Testes do Collision2D ===\n";
+
+    // --- bounds ----------------------------------------------------------
+    std::cout << "\n-- bounds --\n";
+    const Collision2D padrao; // halfExtents padrao: (32, 32), caixa 64 x 64
+    const AABB b1 = padrao.bounds(Vector2D(100.0f, 100.0f));
+    testar_vetor("bounds padrao em (100, 100): min", b1.min, Vector2D(68.0f, 68.0f));
+    testar_vetor("bounds padrao em (100, 100): max", b1.max, Vector2D(132.0f, 132.0f));
+
+    const AABB b2 = padrao.bounds(Vector2D(0.0f, 0.0f));
+    testar_vetor("bounds padrao na origem: min", b2.min, Vector2D(-32.0f, -32.0f));
+    testar_vetor("bounds padrao na origem: max", b2.max, Vector2D(32.0f, 32.0f));
+
+    Collision2D retangulo;
+    retangulo.halfExtents = Vector2D(10.0f, 20.0f); // caixa 20 x 40
+    const AABB b3 = retangulo.bounds(Vector2D(50.0f, 50.0f));
+    testar_vetor("bounds 20x40 em (50, 50): min", b3.min, Vector2D(40.0f, 30.0f));
+    testar_vetor("bounds 20x40 em (50, 50): max", b3.max, Vector2D(60.0f, 70.0f));
+
+    // --- intersects ------------------------------------------------------
+    std::cout << "\n-- intersects --\n";
+    const AABB A = caixa(0.0f, 0.0f, 10.0f, 10.0f);
+
+    testar_bool("sobrepostas",
+        A.intersects(caixa(5.0f, 5.0f, 15.0f, 15.0f)), true);
+    testar_bool("separadas no eixo x",
+        A.intersects(caixa(20.0f, 0.0f, 30.0f, 10.0f)), false);
+    testar_bool("sobrepoem no x, mas separadas no y",
+        A.intersects(caixa(0.0f, 20.0f, 10.0f, 30.0f)), false);
+    testar_bool("so encostando a borda (conta como colisao)",
+        A.intersects(caixa(10.0f, 0.0f, 20.0f, 10.0f)), true);
+    testar_bool("so encostando o canto (conta como colisao)",
+        A.intersects(caixa(10.0f, 10.0f, 20.0f, 20.0f)), true);
+    testar_bool("uma dentro da outra",
+        caixa(0.0f, 0.0f, 100.0f, 100.0f).intersects(caixa(40.0f, 40.0f, 60.0f, 60.0f)), true);
+    testar_bool("caixas identicas",
+        A.intersects(A), true);
+    testar_bool("ordem invertida: B intersects A",
+        caixa(5.0f, 5.0f, 15.0f, 15.0f).intersects(A), true);
+    testar_bool("ordem invertida: separadas",
+        caixa(20.0f, 0.0f, 30.0f, 10.0f).intersects(A), false);
+
+    // --- bounds + intersects juntos (duas entidades 64 x 64) --------------
+    std::cout << "\n-- entidades --\n";
+    const AABB e1 = padrao.bounds(Vector2D(100.0f, 100.0f)); // vai de 68 a 132
+    testar_bool("entidades a 50 px de distancia colidem",
+        e1.intersects(padrao.bounds(Vector2D(150.0f, 100.0f))), true);
+    testar_bool("entidades a 64 px de distancia se encostam",
+        e1.intersects(padrao.bounds(Vector2D(164.0f, 100.0f))), true);
+    testar_bool("entidades a 100 px de distancia nao colidem",
+        e1.intersects(padrao.bounds(Vector2D(200.0f, 100.0f))), false);
+
     // --- Resumo ----------------------------------------------------------
     std::cout << "\n=== Resultado: " << (g_total - g_falhas) << " de " << g_total
         << " testes passaram ===\n";
 
     return g_falhas == 0 ? 0 : 1;
 }
-
-// Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
-// Depurar programa: F5 ou menu Depurar > Iniciar Depuração
-
-// Dicas para Começar: 
-//   1. Use a janela do Gerenciador de Soluções para adicionar/gerenciar arquivos
-//   2. Use a janela do Team Explorer para conectar-se ao controle do código-fonte
-//   3. Use a janela de Saída para ver mensagens de saída do build e outras mensagens
-//   4. Use a janela Lista de Erros para exibir erros
-//   5. Ir Para o Projeto > Adicionar Novo Item para criar novos arquivos de código, ou Projeto > Adicionar Item Existente para adicionar arquivos de código existentes ao projeto
-//   6. No futuro, para abrir este projeto novamente, vá para Arquivo > Abrir > Projeto e selecione o arquivo. sln
