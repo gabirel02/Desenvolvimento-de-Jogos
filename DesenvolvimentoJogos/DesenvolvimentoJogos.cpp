@@ -7,6 +7,7 @@
 #include "Vector2D.hpp"
 #include "Transform2D.hpp"
 #include "Collision2D.hpp"
+#include "RigidBody2D.hpp"
 
 // --- Contadores de testes -------------------------------------------------
 static int g_total = 0;
@@ -288,6 +289,42 @@ int main() {
         e1.intersects(padrao.bounds(Vector2D(164.0f, 100.0f))), true);
     testar_bool("entidades a 100 px de distancia nao colidem",
         e1.intersects(padrao.bounds(Vector2D(200.0f, 100.0f))), false);
+
+    // =====================================================================
+    std::cout << "\n=== Testes do RigidBody2D ===\n\n";
+
+    // Aceleracao constante: confirma a ordem do Euler semi-implicito
+    RigidBody2D corpo;
+    corpo.acceleration = Vector2D(10.0f, 0.0f);
+    corpo.integrate(1.0f);
+    testar_vetor("passo 1: velocidade", corpo.velocity, Vector2D(10.0f, 0.0f));
+    testar_vetor("passo 1: posicao usa a velocidade ja atualizada", corpo.position, Vector2D(10.0f, 0.0f));
+    corpo.integrate(1.0f);
+    testar_vetor("passo 2: velocidade", corpo.velocity, Vector2D(20.0f, 0.0f));
+    testar_vetor("passo 2: posicao", corpo.position, Vector2D(30.0f, 0.0f));
+
+    // Velocidade constante (sem aceleracao)
+    RigidBody2D constante;
+    constante.velocity = Vector2D(5.0f, 0.0f);
+    constante.integrate(2.0f);
+    testar_vetor("velocidade constante: posicao", constante.position, Vector2D(10.0f, 0.0f));
+    testar_vetor("velocidade constante: velocidade nao muda", constante.velocity, Vector2D(5.0f, 0.0f));
+
+    // Objeto parado
+    RigidBody2D parado;
+    parado.integrate(1.0f);
+    testar_vetor("objeto parado continua na origem", parado.position, Vector2D(0.0f, 0.0f));
+
+    // Gravidade: o eixo Y cresce para baixo, entao o objeto "cai" aumentando o y
+    RigidBody2D queda;
+    queda.position = Vector2D(100.0f, 0.0f);
+    queda.acceleration = Vector2D(0.0f, 10.0f);
+    queda.integrate(0.5f);
+    testar_vetor("gravidade: velocidade apos 0.5 s", queda.velocity, Vector2D(0.0f, 5.0f));
+    testar_vetor("gravidade: posicao apos 0.5 s", queda.position, Vector2D(100.0f, 2.5f));
+
+    // Pre-condicao: descomente para ver o assert parar o programa
+    // RigidBody2D invalido; invalido.integrate(0.0f);
 
     // --- Resumo ----------------------------------------------------------
     std::cout << "\n=== Resultado: " << (g_total - g_falhas) << " de " << g_total

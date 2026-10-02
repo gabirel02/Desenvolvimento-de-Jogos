@@ -1,0 +1,19 @@
+integrate
+	Avança o movimento do objeto em um passo de tempo dt, em segundos.
+	Usei o método de Euler semi-implícito, conforme o cabeçalho, com
+	duas contas nesta ordem:
+	  velocity += acceleration * dt;
+	  position += velocity * dt;
+	Primeiro a velocidade é atualizada pela aceleração; depois a posição
+	é atualizada usando a velocidade já atualizada. Essa ordem é o que
+	torna o método semi-implícito, que é mais estável para simulações
+	interativas.
+	As contas reaproveitam os operadores do Vector2D: a multiplicação de
+	vetor por escalar (acceleration * dt) e o operator+=, que soma o
+	resultado no próprio vetor.
+	A função usa a aceleração, mas não a modifica. A aceleração é um
+	membro do objeto, definido por quem o controla (por exemplo, a
+	gravidade ou o comando do jogador) antes de chamar o integrate. Por
+	isso o único parâmetro é o dt, que é uma informação do momento da
+	chamada, e não do objeto.
+	O cabeçalho exige dt > 0, verifiquei com assert na primeira linha da função. 
