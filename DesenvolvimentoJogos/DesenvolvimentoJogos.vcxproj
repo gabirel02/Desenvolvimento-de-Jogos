@@ -142,15 +142,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\source\Collision2D.cpp" />
+    <ClCompile Include="..\source\Dungeon2D.cpp" />
     <ClCompile Include="..\source\RigidBody2D.cpp" />
+    <ClCompile Include="..\source\TileMap.cpp" />
     <ClCompile Include="..\source\Transform2D.cpp" />
     <ClCompile Include="..\source\Vector2D.cpp" />
     <ClCompile Include="DesenvolvimentoJogos.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\Collision2D.hpp" />
+    <ClInclude Include="..\source\Dungeon2D.hpp" />
     <ClInclude Include="..\source\Global.hpp" />
     <ClInclude Include="..\source\RigidBody2D.hpp" />
+    <ClInclude Include="..\source\TileMap.hpp" />
     <ClInclude Include="..\source\Transform2D.hpp" />
     <ClInclude Include="..\source\Vector2D.hpp" />
   </ItemGroup>

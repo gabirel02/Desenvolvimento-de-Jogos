@@ -1,0 +1,133 @@
+Funções auxiliares
+	Criei duas funções auxiliares, usadas pelo loadFromDungeon, dentro de
+	um "namespace sem nome", o que faz só o TileMap.cpp as
+	enxergue. Elas não fazem parte do contrato do cabeçalho:
+	- cavar: marca como EMPTY_TILE todas as células de um retângulo (Rect).
+	  Os limites do Rect são inclusivos (de left até right e de top até
+	  bottom, contando as bordas). Células fora do mapa são ignoradas.
+	  Ela existe porque o mesmo trabalho é feito para as salas e para os
+	  corredores; assim os laços ficam escritos uma vez só.
+	- cavarSalas: percorre a árvore BSP de forma recursiva (a função chama
+	  a si mesma para os filhos) e cava a sala de cada folha. Ela é
+	  necessária porque a árvore pode ter qualquer profundidade, e uma
+	  função recursiva precisa receber um nó da árvore como parâmetro; o
+	  loadFromDungeon recebe a masmorra inteira, então não serve para isso.
+
+width e height
+	Retornam a largura (m_width) e a altura (m_height) do mapa, em tiles.
+	Um TileMap recém-criado tem 0 x 0.
+
+at
+	Retorna o valor de uma célula. Primeiro verifica com assert a
+	pré-condição do cabeçalho: a coluna deve estar entre 0 e largura - 1
+	e a linha entre 0 e altura - 1 (por isso uso < e não <=). Depois
+	calcula a posição com row * m_width + col e retorna m_cells nessa
+	posição. Não tem noexcept, como no cabeçalho, porque tem pré-condição.
+
+isWall
+	Diz se a célula é parede. Reaproveita o at: compara o valor retornado
+	com WALL_TILE. Como o at já verifica os índices, não repeti o assert.
+
+data
+	Retorna um ponteiro para o início da lista de células, para que outro
+	código (por exemplo, o que desenha o mapa) leia tudo de uma vez. Usa a
+	função data() do próprio std::vector. O retorno é const int*, então
+	quem recebe o ponteiro só pode ler, não alterar.
+
+toIndices
+	Converte uma posição do mundo (em pixels) na célula que a contém, com
+	a fórmula do Global.hpp: col = floor(x / TILE_SIZE) e
+	row = floor(y / TILE_SIZE). Os resultados são devolvidos pelos
+	parâmetros col e row, que são referências (int&): a função escreve
+	direto nas variáveis de quem chamou.
+	Usei std::floor (arredondar para baixo) antes de converter para int.
+	Converter direto cortaria as casas decimais, o que dá errado com
+	números negativos: x = -10 deve cair na coluna -1, e não na 0.
+	Exemplo: a posição (100, 200) fica na coluna 1, linha 3.
+
+toWorld
+	Faz o caminho contrário: retorna a posição, em pixels, do centro de uma
+	célula, com a fórmula do Global.hpp: ((col + 0,5) * TILE_SIZE,
+	(row + 0,5) * TILE_SIZE). O + 0,5 leva ao meio do tile: a coluna 0 vai
+	do pixel 0 ao 64, e o centro fica em 32.
+	Exemplo: a célula (1, 3) tem centro em (96, 224).
+
+loadFromDungeon
+	Transforma a masmorra gerada pelo Dungeon2D em matriz de tiles, em
+	quatro passos, como descrito no cabeçalho:
+	1. a matriz recebe o tamanho da masmorra (width x height);
+	2. todas as células viram WALL_TILE (usei m_cells.assign);
+	3. as salas de todas as folhas da árvore BSP viram EMPTY_TILE (com a
+	   função auxiliar cavarSalas, que percorre a árvore recursivamente);
+	4. todas as células dos corredores também viram EMPTY_TILE (um laço
+	   "for" que passa por cada corredor da lista corridors).
+	Assim, o que não é sala nem corredor continua sendo parede.
+
+saveCSV
+	Salva a matriz num arquivo de texto no formato do cabeçalho: uma linha
+	do arquivo por linha do mapa, valores separados por uma vírgula, sem
+	vírgula no final, começando pela linha 0.
+	Uso std::ofstream para escrever no arquivo. Se o arquivo não puder ser
+	criado, retorna false. Para não sobrar vírgula no final, a vírgula é
+	escrita antes de cada valor, exceto o primeiro da linha. No fim,
+	retorna arquivo.good(), que é false se houve erro na escrita.
+	Exemplo de arquivo de um mapa 4 x 3:
+	  1,1,1,1
+	  1,0,0,1
+	  1,1,1,1
+
+loadCSV
+	Lê um arquivo no formato do saveCSV. Uso std::getline para ler uma
+	linha por vez e, dentro de cada linha, std::getline com ',' para
+	separar os valores.
+	Como o mapa só tem dois tipos de célula, cada valor é conferido
+	comparando o texto com os dois valores possíveis, convertidos em
+	texto com std::to_string (EMPTY_TILE vira "0" e WALL_TILE vira "1").
+	Usar as constantes do Global.hpp, em vez de escrever "0" e "1"
+	direto, segue a regra de sempre usar os símbolos definidos lá.
+	O arquivo é recusado (retorna false) se: não puder ser aberto; estiver
+	vazio; tiver linha vazia ou vírgula no final; tiver qualquer valor
+	diferente de EMPTY_TILE e WALL_TILE (valor vazio, texto ou outro
+	número); ou tiver linhas com quantidades diferentes de colunas.
+	O cabeçalho exige que, em caso de erro, o mapa fique inalterado. Por
+	isso tudo é lido primeiro em variáveis temporárias, e só no final,
+	com a leitura inteira válida, elas são copiadas para m_width, m_height
+	e m_cells.
+	Também aceitei linhas terminadas em "\r\n", porque arquivos salvos no
+	Windows costumam ter esse "\r" no fim de cada linha.
+
+randomEmptyCell
+	Sorteia uma célula livre. Primeiro junta numa lista as posições de
+	todas as células EMPTY_TILE. Depois verifica com assert a pré-condição
+	(precisa existir pelo menos uma). Então sorteia uma posição da lista e
+	a converte de volta para coluna e linha: col = posição % largura e
+	row = posição / largura.
+	Para o sorteio usei o gerador std::mt19937, iniciado com
+	std::random_device (que fornece uma semente diferente a cada execução).
+	O gerador é "static": é criado uma única vez e continua existindo
+	entre as chamadas, então cada chamada continua a sequência aleatória
+	em vez de recomeçar.
+
+Testes realizados
+	As funções foram testadas no arquivo DesenvolvimentoJogos.cpp:
+	- mapa novo: largura e altura 0;
+	- toIndices: (100, 200) -> (1, 3); (0, 0) -> (0, 0); (63,9; 64) ->
+	  (0, 1); (-10, 0) -> coluna -1 (confirma o uso do floor);
+	- toWorld: (0, 0) -> (32, 32); (1, 3) -> (96, 224); ida e volta com o
+	  toIndices devolve a mesma célula;
+	- loadFromDungeon: o mapa tem o tamanho da masmorra; a borda é toda
+	  parede; todas as células das salas e dos corredores estão livres; e
+	  todas as células livres podem ser alcançadas a partir de qualquer
+	  outra (teste de "inundação", que confirma que o mapa é conectado);
+	- at, isWall e data: valores coerentes entre si;
+	- 120 masmorras (6 tamanhos, de 7 x 7 a 100 x 8, com 20 sementes cada)
+	  convertidas em mapa: todas conectadas e com a borda de parede;
+	- saveCSV: o arquivo tem largura - 1 vírgulas por linha e nenhuma
+	  vírgula no final; salvar e carregar de novo dá um mapa idêntico;
+	- loadCSV: um CSV 4 x 3 escrito à mão é lido corretamente; linhas com
+	  "\r\n" são aceitas; 6 arquivos inválidos são recusados e o mapa
+	  continua igual depois de cada erro; arquivo inexistente retorna false;
+	- randomEmptyCell: 200 sorteios caem sempre em células livres; num mapa
+	  com uma única célula livre, o sorteio sempre devolve essa célula;
+	- pré-condições: o assert interrompe o programa ao chamar o at com
+	  índice fora do mapa e o randomEmptyCell num mapa sem células livres.
