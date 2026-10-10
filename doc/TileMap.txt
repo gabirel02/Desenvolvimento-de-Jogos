@@ -107,27 +107,3 @@ randomEmptyCell
 	O gerador é "static": é criado uma única vez e continua existindo
 	entre as chamadas, então cada chamada continua a sequência aleatória
 	em vez de recomeçar.
-
-Testes realizados
-	As funções foram testadas no arquivo DesenvolvimentoJogos.cpp:
-	- mapa novo: largura e altura 0;
-	- toIndices: (100, 200) -> (1, 3); (0, 0) -> (0, 0); (63,9; 64) ->
-	  (0, 1); (-10, 0) -> coluna -1 (confirma o uso do floor);
-	- toWorld: (0, 0) -> (32, 32); (1, 3) -> (96, 224); ida e volta com o
-	  toIndices devolve a mesma célula;
-	- loadFromDungeon: o mapa tem o tamanho da masmorra; a borda é toda
-	  parede; todas as células das salas e dos corredores estão livres; e
-	  todas as células livres podem ser alcançadas a partir de qualquer
-	  outra (teste de "inundação", que confirma que o mapa é conectado);
-	- at, isWall e data: valores coerentes entre si;
-	- 120 masmorras (6 tamanhos, de 7 x 7 a 100 x 8, com 20 sementes cada)
-	  convertidas em mapa: todas conectadas e com a borda de parede;
-	- saveCSV: o arquivo tem largura - 1 vírgulas por linha e nenhuma
-	  vírgula no final; salvar e carregar de novo dá um mapa idêntico;
-	- loadCSV: um CSV 4 x 3 escrito à mão é lido corretamente; linhas com
-	  "\r\n" são aceitas; 6 arquivos inválidos são recusados e o mapa
-	  continua igual depois de cada erro; arquivo inexistente retorna false;
-	- randomEmptyCell: 200 sorteios caem sempre em células livres; num mapa
-	  com uma única célula livre, o sorteio sempre devolve essa célula;
-	- pré-condições: o assert interrompe o programa ao chamar o at com
-	  índice fora do mapa e o randomEmptyCell num mapa sem células livres.

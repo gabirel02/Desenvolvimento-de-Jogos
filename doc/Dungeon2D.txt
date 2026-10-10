@@ -1,0 +1,73 @@
+Decisões gerais
+	- Limites inclusivos: um Rect vai de left até right e de top até
+	  bottom, contando as bordas. Por isso a largura é right - left + 1
+	  (de 0 a 4 são 5 tiles). Isso combina com o cabeçalho, que diz que os
+	  dois cantos (left, top) e (right, bottom) fazem parte do retângulo.
+	- Constantes: TAMANHO_MINIMO_SALA = 5 e LARGURA_CORREDOR = 3, vindas
+	  das regras do cabeçalho; MARGEM = 1, que é o tile de parede que
+	  deixei entre cada sala e a borda da sua região. Com isso, a menor
+	  região possível tem 5 + 1 + 1 = 7 tiles.
+	- As constantes e as funções auxiliares ficam num "namespace sem nome",
+	  que faz com que só o Dungeon2D.cpp as enxergue. O cabeçalho não
+	  declara funções auxiliares, e assim o contrato não precisou mudar.
+	- Recursão: várias funções chamam a si mesmas para os filhos de um nó.
+	  É a forma natural de trabalhar com árvores.
+
+Construtor
+	Guarda a largura e a altura recebidas nos membros width e height,
+	usando a lista de inicialização (": width(widthTiles), ..."), que é a
+	forma recomendada em C++ para construtores. Verifica com assert a
+	pré-condição do cabeçalho: as duas dimensões devem ser maiores que 0.
+	O root já começa nulo e a lista de corredores já começa vazia, então
+	não foi preciso mexer neles.
+
+generate
+	Gera a masmorra inteira em duas etapas.
+	Preparação:
+	- verifica com assert que a masmorra tem pelo menos 7 x 7 tiles. O
+	  cabeçalho exige salas de no mínimo 5 x 5; com a parede em volta, uma
+	  masmorra menor não teria espaço para nenhuma sala;
+	- cria o gerador de números aleatórios std::mt19937 com a semente
+	  recebida. Como o mt19937 sempre produz a mesma sequência para a
+	  mesma semente, a mesma semente gera sempre a mesma masmorra, como o
+	  cabeçalho pede;
+	- apaga uma geração anterior: limpa a lista de corredores e cria um
+	  root novo. Ao trocar o root, o unique_ptr libera sozinho a árvore
+	  antiga;
+	- a região do root é o mapa inteiro: de (0, 0) até
+	  (width - 1, height - 1).
+	Etapa 1, dividir o espaço (função auxiliar dividir):
+	- uma região só pode ser cortada numa direção se as duas metades
+	  continuarem com pelo menos 7 tiles nessa direção;
+	- se não puder ser cortada em nenhuma direção, o nó vira uma folha e
+	  recebe uma sala (função criarSala);
+	- se puder, corto o lado mais comprido (largura maior: corte vertical;
+	  altura maior: corte horizontal; iguais: sorteio). Isso evita regiões
+	  muito finas;
+	- a posição do corte é sorteada entre os limites que mantêm as duas
+	  metades com o tamanho mínimo;
+	- criam-se os dois filhos (left e right) com make_unique, cada um com
+	  sua metade da região, e cada filho é dividido da mesma forma.
+	Criação das salas (função criarSala):
+	- a largura e a altura da sala são sorteadas entre 5 e o tamanho da
+	  região menos a margem dos dois lados;
+	- a posição também é sorteada, sempre dentro da região e com pelo
+	  menos 1 tile de parede até a borda dela. Assim, salas de regiões
+	  vizinhas nunca se encostam, e a borda do mapa fica toda de parede.
+	Etapa 2, criar os corredores (função conectar):
+	- a árvore é percorrida de baixo para cima. Em cada nó interno, os
+	  dois filhos já estão conectados por dentro; basta um corredor ligando
+	  uma sala do filho esquerdo a uma sala do filho direito para o nó
+	  inteiro ficar conectado. Repetindo isso até o root, todas as salas
+	  ficam ligadas entre si, que é a regra de conectividade do cabeçalho;
+	- entre as salas dos dois lados, escolho o par com os centros mais
+	  próximos, para os corredores ficarem curtos;
+	- o corredor tem forma de "L" (função ligar): um trecho horizontal que
+	  sai do centro da sala A e um trecho vertical que chega ao centro da
+	  sala B. Cada trecho tem 3 tiles de largura (o centro e mais 1 tile de
+	  cada lado) e se estende 1 tile além do centro, para a dobra do L
+	  ficar completa. Se as salas estiverem alinhadas, basta um trecho;
+	- como cada sala tem no mínimo 5 x 5, o centro com 1 tile de cada lado
+	  fica sempre dentro da sala; por isso o corredor sempre encosta nas
+	  duas salas que liga.
+	Nos nós internos, o room fica sem uso, como o cabeçalho descreve.
