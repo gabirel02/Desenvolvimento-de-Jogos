@@ -150,9 +150,12 @@
     <ClCompile Include="DesenvolvimentoJogos.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\BehaviorTree.hpp" />
     <ClInclude Include="..\source\Collision2D.hpp" />
     <ClInclude Include="..\source\Dungeon2D.hpp" />
+    <ClInclude Include="..\source\Entity.hpp" />
     <ClInclude Include="..\source\Global.hpp" />
+    <ClInclude Include="..\source\NPC.hpp" />
     <ClInclude Include="..\source\RigidBody2D.hpp" />
     <ClInclude Include="..\source\TileMap.hpp" />
     <ClInclude Include="..\source\Transform2D.hpp" />
