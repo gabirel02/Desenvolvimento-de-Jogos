@@ -1,0 +1,19 @@
+ConditionNode
+Busca o nome da condição na lista do contexto fornecido. Retorna sucesso se encontrar a string com valor diferente de zero, 
+mas sem carregar nenhum comando de ação.
+
+ActionNode
+Ignora a verificação do contexto e sempre retorna sucesso imediato, carregando a string de comando 
+que foi configurada durante a criação do nó.
+
+SequenceNode
+Itera sobre os nós filhos da esquerda para a direita. Falha e interrompe a execução no primeiro filho 
+que retornar falha. Se todos tiverem sucesso, retorna sucesso propagando o último comando não vazio encontrado na sequência.
+
+SelectorNode
+Itera sobre os nós filhos da esquerda para a direita. Retorna sucesso e interrompe a busca no primeiro 
+filho que for bem-sucedido, repassando o comando dele. Falha apenas se a lista inteira de filhos falhar.
+
+BehaviorTree
+Inicia o ciclo de avaliação acionando o método tick do nó raiz. Retorna a string do comando final gerado
+caso haja sucesso, ou uma string vazia se a árvore retornar falha.

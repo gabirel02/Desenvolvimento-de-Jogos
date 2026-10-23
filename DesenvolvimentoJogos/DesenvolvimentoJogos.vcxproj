@@ -141,6 +141,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\source\BehaviorTree.cpp" />
     <ClCompile Include="..\source\Collision2D.cpp" />
     <ClCompile Include="..\source\Dungeon2D.cpp" />
     <ClCompile Include="..\source\RigidBody2D.cpp" />

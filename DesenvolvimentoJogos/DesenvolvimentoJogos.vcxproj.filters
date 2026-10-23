@@ -36,6 +36,9 @@
     <ClCompile Include="..\source\TileMap.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
+    <ClCompile Include="..\source\BehaviorTree.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\Collision2D.hpp">
