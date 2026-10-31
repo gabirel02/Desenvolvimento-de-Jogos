@@ -149,6 +149,7 @@
     <ClCompile Include="..\source\Transform2D.cpp" />
     <ClCompile Include="..\source\Vector2D.cpp" />
     <ClCompile Include="DesenvolvimentoJogos.cpp" />
+    <ClCompile Include="PathFind.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\source\BehaviorTree.hpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="..\source\Entity.hpp" />
     <ClInclude Include="..\source\Global.hpp" />
     <ClInclude Include="..\source\NPC.hpp" />
+    <ClInclude Include="..\source\PathFind.hpp" />
     <ClInclude Include="..\source\RigidBody2D.hpp" />
     <ClInclude Include="..\source\TileMap.hpp" />
     <ClInclude Include="..\source\Transform2D.hpp" />

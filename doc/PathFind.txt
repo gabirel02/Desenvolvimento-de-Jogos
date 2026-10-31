@@ -1,0 +1,22 @@
+PathFind (construtor)
+Guarda o ponteiro para a matriz do mapa, a largura e a altura, sem copiar a matriz. Por isso o TileMap
+de onde ela veio precisa continuar existindo enquanto o PathFind for usado. Para o programa com assert
+se a matriz for nula ou se a largura ou a altura não forem maiores que zero.
+ 
+findPath
+Converte as posições de início e destino (em pixels) para células, dividindo por TILE_SIZE e arredondando
+para baixo. Se uma delas estiver fora do mapa ou numa parede, retorna uma lista vazia.
+Usa o algoritmo A*: a cada passo visita a célula ainda não visitada com o menor f = g + h, onde g é o
+custo real do início até ela e h é a estimativa do que falta até o destino. A célula de menor f é obtida
+por uma fila de prioridade.
+Examina os 8 vizinhos de cada célula. Passo reto custa 10 e passo na diagonal custa 14 (aproximação
+inteira de 10 vezes raiz de 2, para as contas ficarem exatas). Só anda na diagonal se as duas células do
+lado também forem livres, para não cortar a quina de uma parede.
+Quando encontra um caminho mais barato até um vizinho, atualiza o g e anota de qual célula veio (o pai).
+Ao chegar no destino, segue os pais de volta até o início, inverte a lista e retorna o centro de cada
+célula em pixels. Se o destino nunca for alcançado, retorna uma lista vazia.
+ 
+heuristica (função auxiliar)
+Calcula o h usando a distância octil: anda na diagonal (14) enquanto faltar distância nos dois eixos e
+depois anda reto (10) o que sobrar. Ignora as paredes, então nunca passa do custo real, o que garante
+que o A* encontre o menor caminho. Fica num namespace sem nome, visível só no PathFind.cpp.
