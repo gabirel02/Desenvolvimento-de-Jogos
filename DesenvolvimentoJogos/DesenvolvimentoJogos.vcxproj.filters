@@ -39,7 +39,10 @@
     <ClCompile Include="..\source\BehaviorTree.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="PathFind.cpp">
+    <ClCompile Include="..\source\main.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\PathFind.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>
