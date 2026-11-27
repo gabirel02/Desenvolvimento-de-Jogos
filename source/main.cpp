@@ -42,9 +42,47 @@ Vector2D lerDirecao() {
     return direcao;
 }
 
-void atualizarJogador(Jogador& jogador) {
+bool colideComParede(const TileMap& mapa, const Collision2D& forma, const Vector2D& posicao) {
+    const AABB caixa = forma.bounds(posicao);
+
+    int colInicio = 0;
+    int rowInicio = 0;
+    int colFim = 0;
+    int rowFim = 0;
+    mapa.toIndices(caixa.min, colInicio, rowInicio);
+    mapa.toIndices(caixa.max - Vector2D(0.01f, 0.01f), colFim, rowFim);
+
+    for (int row = rowInicio; row <= rowFim; ++row) {
+        for (int col = colInicio; col <= colFim; ++col) {
+            const bool foraDoMapa = col < 0 || col >= mapa.width() || row < 0 || row >= mapa.height();
+            if (foraDoMapa || mapa.isWall(col, row)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void atualizarJogador(Jogador& jogador, const TileMap& mapa) {
     jogador.corpo.velocity = lerDirecao() * VELOCIDADE_JOGADOR;
+
+    const Vector2D antes = jogador.corpo.position;
     jogador.corpo.integrate(DT);
+    const Vector2D depois = jogador.corpo.position;
+
+    Vector2D posicao(depois.x, antes.y);
+    if (colideComParede(mapa, jogador.forma, posicao)) {
+        posicao.x = antes.x;
+        jogador.corpo.velocity.x = 0.0f;
+    }
+
+    posicao.y = depois.y;
+    if (colideComParede(mapa, jogador.forma, posicao)) {
+        posicao.y = antes.y;
+        jogador.corpo.velocity.y = 0.0f;
+    }
+
+    jogador.corpo.position = posicao;
 }
 
 void desenharMapa(sf::RenderWindow& janela, const TileMap& mapa) {
@@ -102,7 +140,7 @@ int main() {
         }
 
         if (janela.hasFocus()) {
-            atualizarJogador(jogador);
+            atualizarJogador(jogador, mapa);
         }
 
         janela.clear(sf::Color::Black);
