@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <string>
 #include "Dungeon2D.hpp"
 #include "TileMap.hpp"
 #include "RigidBody2D.hpp"
@@ -15,6 +16,11 @@ struct Jogador {
     Collision2D forma;
 };
 
+struct Saida {
+    Vector2D posicao;
+    Collision2D forma;
+};
+
 void gerarSala(TileMap& mapa, unsigned semente) {
     Dungeon2D masmorra(LARGURA_MAPA, ALTURA_MAPA);
     masmorra.generate(semente);
@@ -27,6 +33,35 @@ void posicionarJogador(Jogador& jogador, const TileMap& mapa) {
     mapa.randomEmptyCell(col, row);
     jogador.corpo.position = mapa.toWorld(col, row);
     jogador.corpo.velocity = Vector2D(0.0f, 0.0f);
+}
+
+void posicionarSaida(Saida& saida, const TileMap& mapa, const Jogador& jogador) {
+    float maiorDistancia = -1.0f;
+
+    for (int tentativa = 0; tentativa < 20; ++tentativa) {
+        int col = 0;
+        int row = 0;
+        mapa.randomEmptyCell(col, row);
+        const Vector2D candidata = mapa.toWorld(col, row);
+        const float distancia = (candidata - jogador.corpo.position).length_squared();
+
+        if (distancia > maiorDistancia) {
+            maiorDistancia = distancia;
+            saida.posicao = candidata;
+        }
+    }
+}
+
+void iniciarSala(TileMap& mapa, Jogador& jogador, Saida& saida, unsigned semente) {
+    gerarSala(mapa, semente);
+    posicionarJogador(jogador, mapa);
+    posicionarSaida(saida, mapa, jogador);
+}
+
+bool tocouSaida(const Jogador& jogador, const Saida& saida) {
+    const AABB caixaJogador = jogador.forma.bounds(jogador.corpo.position);
+    const AABB caixaSaida = saida.forma.bounds(saida.posicao);
+    return caixaJogador.intersects(caixaSaida);
 }
 
 Vector2D lerDirecao() {
@@ -102,6 +137,15 @@ void desenharMapa(sf::RenderWindow& janela, const TileMap& mapa) {
     }
 }
 
+void desenharSaida(sf::RenderWindow& janela, const Saida& saida) {
+    const Vector2D meio = saida.forma.halfExtents;
+    sf::RectangleShape porta(sf::Vector2f(meio.x * 2.0f, meio.y * 2.0f));
+    porta.setOrigin(meio.x, meio.y);
+    porta.setPosition(saida.posicao.x, saida.posicao.y);
+    porta.setFillColor(sf::Color(60, 180, 90));
+    janela.draw(porta);
+}
+
 void desenharJogador(sf::RenderWindow& janela, const Jogador& jogador) {
     const Vector2D meio = jogador.forma.halfExtents;
     sf::RectangleShape quadrado(sf::Vector2f(meio.x * 2.0f, meio.y * 2.0f));
@@ -119,12 +163,16 @@ int main() {
     janela.setView(camera);
 
     unsigned semente = 1;
+    int sala = 1;
     TileMap mapa;
-    gerarSala(mapa, semente);
 
     Jogador jogador;
     jogador.forma.halfExtents = Vector2D(24.0f, 24.0f);
-    posicionarJogador(jogador, mapa);
+
+    Saida saida;
+
+    iniciarSala(mapa, jogador, saida, semente);
+    janela.setTitle("Masmorra - Sala " + std::to_string(sala));
 
     while (janela.isOpen()) {
         sf::Event evento;
@@ -134,8 +182,7 @@ int main() {
             }
             if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::R) {
                 semente++;
-                gerarSala(mapa, semente);
-                posicionarJogador(jogador, mapa);
+                iniciarSala(mapa, jogador, saida, semente);
             }
         }
 
@@ -143,8 +190,16 @@ int main() {
             atualizarJogador(jogador, mapa);
         }
 
+        if (tocouSaida(jogador, saida)) {
+            sala++;
+            semente++;
+            iniciarSala(mapa, jogador, saida, semente);
+            janela.setTitle("Masmorra - Sala " + std::to_string(sala));
+        }
+
         janela.clear(sf::Color::Black);
         desenharMapa(janela, mapa);
+        desenharSaida(janela, saida);
         desenharJogador(janela, jogador);
         janela.display();
     }
