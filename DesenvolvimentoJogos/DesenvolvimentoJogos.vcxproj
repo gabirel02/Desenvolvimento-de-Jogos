@@ -149,6 +149,7 @@
     <ClCompile Include="..\source\BehaviorTree.cpp" />
     <ClCompile Include="..\source\Collision2D.cpp" />
     <ClCompile Include="..\source\Dungeon2D.cpp" />
+    <ClCompile Include="..\source\GerenteColisao.cpp" />
     <ClCompile Include="..\source\main.cpp" />
     <ClCompile Include="..\source\PathFind.cpp" />
     <ClCompile Include="..\source\RigidBody2D.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="..\source\Collision2D.hpp" />
     <ClInclude Include="..\source\Dungeon2D.hpp" />
     <ClInclude Include="..\source\Entity.hpp" />
+    <ClInclude Include="..\source\GerenteColisao.hpp" />
     <ClInclude Include="..\source\Global.hpp" />
     <ClInclude Include="..\source\NPC.hpp" />
     <ClInclude Include="..\source\PathFind.hpp" />
